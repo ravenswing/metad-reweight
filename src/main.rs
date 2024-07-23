@@ -4,21 +4,34 @@ use std::io::{self, BufRead};
 use std::path::Path;
 
 fn main() {
+    // Set the input filename
     let filename = "/home/rhys/Documents/rew_test/test.dat";
+    // Initialise variables so they can be set in the if statement
     let x_vals;
     let y_vals;
+    // Call read_lines and unpack Result
     if let Ok(lines) = read_lines(filename) {
+        // Each line is also a Result, so unpack those
         let lines = lines.map(|x| x.unwrap());
+        // Split columns into f32 Vec 
         (x_vals, y_vals) = read_xy_pairs(lines);
     } else {
+        // If something didn't work, panic!
         panic!()
     }
+    // Check that the variables were read correctly
     println!("{:?}", x_vals);
+    
+    // Create a dataframe from the two Vecs with the data
     let df: PolarsResult<DataFrame> = df!(
         "X" => x_vals,
         "Y" => y_vals,
     );
+    
+    // DataFrame is ALSO a Result, so unpack THAT.
     let df = df.unwrap();
+    
+    // Print head to ensure all is well.
     println!("{}", df.head(Some(3)));
 }
 
