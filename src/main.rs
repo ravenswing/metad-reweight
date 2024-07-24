@@ -5,7 +5,7 @@ use std::path::Path;
 
 fn main() {
     // Set the input filename
-    let filename = "/home/rhys/Documents/rew_test/test.dat";
+    let filename: &str = "/home/rhys/Documents/rew_test/test.dat";
     // Initialise variables so they can be set in the if statement
     let x_vals;
     let y_vals;
@@ -29,11 +29,24 @@ fn main() {
     // Print head to ensure all is well.
     println!("{}", df.head(Some(3)));
 
-    let filename2 = "/home/rhys/Documents/rew_test/test2.dat";
-    let lines2 = read_lines(filename2).expect("Could not read lines from file.");
+    let filename2: &str = "/home/rhys/Documents/rew_test/test2.dat";
+
+    let lines2: io::Lines<io::BufReader<File>> =
+        read_lines(filename2).expect("Could not read lines from file: {filename2}");
     let lines2 = lines2.map(|x| x.unwrap());
-    println!("{:?}", lines2.next());
-    let new = process_rows(lines2, 3);
+
+    let lines3: io::Lines<io::BufReader<File>> =
+        read_lines(filename2).expect("Could not read lines from file: {filename2}");
+    let n_cols: usize = lines3
+        .map(|x| x.unwrap())
+        .next()
+        .unwrap()
+        .split_whitespace()
+        .count();
+
+    println!("Found {n_cols} columns in {filename2}");
+
+    let new: Vec<Vec<f32>> = process_rows(lines2, n_cols);
     let new = transpose(new);
 }
 
@@ -62,8 +75,8 @@ fn read_xy_pairs(i: impl Iterator<Item = String>) -> (Vec<f32>, Vec<f32>) {
     .unzip()
 }
 
-fn process_rows(i: impl Iterator<Item = String>, n: u32) -> Vec<Vec<f32>> {
-    let num_cols = usize::try_from(n).unwrap();
+fn process_rows(i: impl Iterator<Item = String>, num_cols: usize) -> Vec<Vec<f32>> {
+    // let num_cols = usize::try_from(n).unwrap();
 
     i.map(|string| -> Vec<f32> {
         string
